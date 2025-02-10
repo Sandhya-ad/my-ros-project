@@ -32,11 +32,9 @@ class WheelControlNode(DTROS):
         self.direction = 1  # 1 = Forward, -1 = Backward
         self.completed_reverse = False  # Track whether reverse is completed
 
-        rospy.loginfo("✅ Wheel Control Node Initialized")
+        rospy.loginfo("Wheel Control Node Initialized")
 
     def left_wheel_callback(self, msg):
-        rospy.loginfo(f"🔄 Left Encoder: {msg.data}")  # Debug log
-
         if self.left_ticks_start is None:
             self.left_ticks_start = msg.data  
 
@@ -44,8 +42,6 @@ class WheelControlNode(DTROS):
         self.update_distance()
 
     def right_wheel_callback(self, msg):
-        rospy.loginfo(f"🔄 Right Encoder: {msg.data}")  # Debug log
-
         if self.right_ticks_start is None:
             self.right_ticks_start = msg.data  
 
@@ -57,71 +53,71 @@ class WheelControlNode(DTROS):
 
         rospy.loginfo(f"📏 Distance Traveled: {abs(self.distance_traveled):.3f} meters (Target: {DISTANCE_TARGET}m)")
 
-        # 🚨 Stop exactly at the target distance
         if self.distance_traveled >= DISTANCE_TARGET:
             self.stop()
-            rospy.sleep(2)
+            rospy.sleep(2)  # Pause before reversing
 
-            if self.direction == 1:  # If we finished moving forward
-                self.reverse_direction()
-            elif self.direction == -1:  # If we finished moving backward
+            if self.direction == 1:  # If moving forward, switch to reverse
+                self.move_reverse()
+            else:  # If moving backward, stop completely
                 rospy.loginfo("✅ Motion Completed Successfully!")
                 self.completed_reverse = True
-                self.stop()  # Ensure final stop after reversing
+                rospy.signal_shutdown("Finished reversing.")
 
     def compute_distance(self, ticks):
-        return abs((2 * math.pi * WHEEL_RADIUS * ticks) / TICKS_PER_REV)  # Ensure distance is always positive
+        return abs((2 * math.pi * WHEEL_RADIUS * ticks) / TICKS_PER_REV)
+
+    def reset_encoders(self):
+        """ Resets encoder values to ensure correct distance calculation. """
+        self.left_ticks_start = None
+        self.right_ticks_start = None
+        self.left_ticks = 0
+        self.right_ticks = 0
 
     def move(self, vel_left, vel_right):
+        """ Sends movement commands to the wheels. """
         message = WheelsCmdStamped()
         message.vel_left = vel_left
         message.vel_right = vel_right
         self._publisher.publish(message)
-        rospy.loginfo(f"🚀 Sending Move Command: Left={vel_left}, Right={vel_right}")
 
     def stop(self):
-        rospy.loginfo("🛑 Stopping Duckiebot...")
+        """ Stops the robot and ensures it doesn't move again. """
         self.move(0, 0)
-        rospy.sleep(1)
+        rospy.loginfo("🛑 Duckiebot Stopped.")
+        rospy.sleep(2)
 
-    def reverse_direction(self):
-        rospy.loginfo("🔄 Reversing Direction!")
-        self.direction = -1  # Switch to reverse
-        self.distance_traveled = 0  # Reset traveled distance
+    def move_forward(self):
+        """ Moves the robot forward for 1.25 meters. """
+        rospy.loginfo("➡️ Moving Forward...")
+        self.direction = 1
+        self.distance_traveled = 0
+        self.reset_encoders()
+        self.move(THROTTLE, THROTTLE)
 
-        # 🚨 FIX: Reset the encoder reference points correctly
-        self.left_ticks_start += self.left_ticks
-        self.right_ticks_start += self.right_ticks
-
-        self.left_ticks = 0
-        self.right_ticks = 0
-
+    def move_reverse(self):
+        """ Moves the robot backward for 1.25 meters. """
         rospy.loginfo("⬅️ Moving Backward...")
-        self.move(self.direction * THROTTLE, self.direction * THROTTLE)
+        self.direction = -1
+        self.distance_traveled = 0
+        self.reset_encoders()
+        self.move(-THROTTLE, -THROTTLE)
 
     def run(self):
-        rospy.loginfo("➡️ Moving Forward...")
-        rate = rospy.Rate(10)  
+        """ Main execution loop for moving forward and then reversing. """
+        self.move_forward()
+        rate = rospy.Rate(12)  # 10 Hz loop
 
         while not rospy.is_shutdown() and not self.completed_reverse:
-            if self.distance_traveled >= DISTANCE_TARGET:  # Stop moving once exact distance is reached
-                self.stop()
-                break
-            self.move(THROTTLE * self.direction, THROTTLE * self.direction)
             rate.sleep()
 
-        self.stop()
-        rospy.loginfo("✅ Motion Completed Successfully!")
-
-        # 🚨 Shutdown only AFTER completing both movements
         if self.completed_reverse:
             rospy.signal_shutdown("Finished reversing.")
 
     def on_shutdown(self):
-        rospy.loginfo("🔻 Shutting down the node...")
-        stop = WheelsCmdStamped(vel_left=0, vel_right=0)
-        self._publisher.publish(stop)
-
+        """ Ensures the robot stops safely before shutting down. """
+        self.stop()
+        rospy.loginfo("🔻 Node shutting down...")
 
 if __name__ == '__main__':
     node = WheelControlNode(node_name='wheel_control_node')
