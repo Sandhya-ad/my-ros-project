@@ -64,7 +64,7 @@ class WheelEncoderReaderNode(DTROS):
         rate_message = rospy.Rate(20)
         # publish 10 messages every second (10 Hz)
         run_cmd = rospy.Rate(0.1)
-        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=sel            self._publisher.publish(message)f._vel_right)
+        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
         while (self._ticks_left - self._initial_ticks_left) < 805 and (self._ticks_right - self._initial_ticks_right) < 805:
             if self._ticks_right is not None and self._ticks_left is not None and self._initial_ticks_left is not None and self.__initial_ticks_right is not None:
                 # start printing values when received from both encoders
