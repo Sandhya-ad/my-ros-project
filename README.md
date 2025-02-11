@@ -7,10 +7,11 @@
 
 ### How to run:
 - First build the code `dts devel build -H csc22907.local -f`
-- Then run the publisher in one terminal using `dts devel run -H csc22907.local -L my-publisher`
-    - It should say something like `Publishing message: 'Hello from csc22907!`
-- Another terminal run  `dts devel run -H csc22907.local -L my-subscriber`
-    - It should say something like ` I heard 'Hello from ROBOT_NAME!'`
+
+- - In one terminal run  `dts devel run -H csc22907.local -L my-subscriber`
+- Then run the publisher in one terminal using `dts devel run -H csc22907 -L my-publisher -n publisher`
+      - It should say something like `Publishing message: 'Hello from csc22907!`  
+      - The subscriber should say something like `I heard 'Hello from ROBOT_NAME!'`
   This shows that the publisher and subscriber are woking good.
 
 ### Camera processed image:
