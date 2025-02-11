@@ -59,7 +59,7 @@ class DTrajectory(DTROS):
 
     def run(self):
         self.rate_message = rospy.Rate(20)  # 20 Hz
-        self.rate_cmd = rospy.Rate(1)  # 1 Hz
+        # self.rate_cmd = rospy.Rate(20)  # 1 Hz
 
         # Make sure initial values are not None
         while self._initial_ticks_left is None or self._initial_ticks_right is None:
@@ -70,9 +70,9 @@ class DTrajectory(DTROS):
 
         self.wheel_base = 10  # cm
 
-        while not rospy.is_shutdown():
-            self.state_1()
-            self.state_2()
+        # while not rospy.is_shutdown():
+        # self.state_1()
+        self.state_2()
 
             # put shutdown here
             # --># rotate 90 degrees clockwise
@@ -118,7 +118,7 @@ class DTrajectory(DTROS):
             self.publisher.publish(message)
 
             self.rate_message.sleep()
-            self.rate_cmd.sleep()
+            # self.rate_cmd.sleep()
 
         # make the robot to stop by setting both wheel speed to 0
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
@@ -143,13 +143,13 @@ class DTrajectory(DTROS):
 
         self._initial_ticks_left = self._ticks_left
 
-        while (self._initial_ticks_left + 35) > self._ticks_left:
+        while (self._initial_ticks_left + 107) > self._ticks_left:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
 
             self.rate_message.sleep()
-            self.rate_cmd.sleep()
+            # self.rate_cmd.sleep()
 
         # make the robot to stop by setting both wheel speed to 0
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
@@ -182,15 +182,15 @@ class DTrajectory(DTROS):
             self.publisher.publish(message)
 
             self.rate_message.sleep()
-            self.rate_cmd.sleep()
+            # self.rate_cmd.sleep()
 
         # make the robot to stop by setting both wheel speed to 0
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
 
-        ###
-        # curve right requries 566 ticks as per calculation
-        ###
+        # # ###
+        # # # curve right requries 566 ticks as per calculation
+        # # ###
 
         # update the parameters
         THROTTLE_RIGHT = 0.25
@@ -210,13 +210,13 @@ class DTrajectory(DTROS):
         self._initial_ticks_right = self._ticks_right
 
         # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 450 and (self._ticks_right - self._initial_ticks_right) < 225:
+        while (self._ticks_left - self._initial_ticks_left) < 208 or (self._ticks_right - self._initial_ticks_right) < 104:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
 
             self.rate_message.sleep()
-            self.rate_cmd.sleep()
+            # self.rate_cmd.sleep()
 
         # make the robot to stop by setting both wheel speed to 0
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
