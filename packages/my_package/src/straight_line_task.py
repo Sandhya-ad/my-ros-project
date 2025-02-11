@@ -7,7 +7,7 @@ from duckietown_msgs.msg import WheelEncoderStamped
 from duckietown_msgs.msg import WheelsCmdStamped
 
 # Throttle and direction for each wheel
-THROTTLE_LEFT = 0.563  # 50% throttle
+THROTTLE_LEFT = 0.545  # 50% throttle
 DIRECTION_LEFT = 1  # Forward
 THROTTLE_RIGHT = 0.5  # 50% throttle
 DIRECTION_RIGHT = 1  # Forward
@@ -75,6 +75,8 @@ class WheelEncoderReaderNode(DTROS):
         # Make the robot go reverse
         DIRECTION_LEFT = -1
         DIRECTION_RIGHT = -1
+        THROTTLE_LEFT = 0.545  # 50% throttle
+        THROTTLE_RIGHT = 0.5  # 50% throttle
 
         # Form the message to reverse the Duckiebot
         self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
@@ -93,10 +95,15 @@ class WheelEncoderReaderNode(DTROS):
             rate_message.sleep()
             rate_cmd.sleep()
             
-            
+        stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
+        self.publisher.publish(stop_cmd)
+        
+        
         # rotate 90 degrees clockwise
-
         THROTTLE_RIGHT = 0
+        THROTTLE_LEFT = 0.545  # 50% throttle
+        DIRECTION_LEFT = 1  # Forward
+        DIRECTION_RIGHT = 1  # Forward
 
         # Form the message to run the Duckiebot
         self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
@@ -104,7 +111,9 @@ class WheelEncoderReaderNode(DTROS):
 
         message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
 
-        while (self._initial_ticks_left + 70) > self._ticks_left:
+        self._initial_ticks_left = self._ticks_left
+        
+        while (self._initial_ticks_left + 35) > self._ticks_left:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -112,8 +121,11 @@ class WheelEncoderReaderNode(DTROS):
             rate_message.sleep()
             rate_cmd.sleep()
             
-        # rotate 90 degrees anti-clockwise
+            
+        stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
+        self.publisher.publish(stop_cmd)
 
+        # rotate 90 degrees anti-clockwise
         DIRECTION_LEFT = -1
 
         # Form the message to run the Duckiebot in reverse
@@ -123,17 +135,24 @@ class WheelEncoderReaderNode(DTROS):
         message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
 
         self._initial_ticks_left = abs(self._ticks_left)
+        
+        while 35 >  abs(self._initial_ticks_left - abs(self._ticks_left)):
+            rospy.loginfo(f"Tick difference [LEFT]: {abs(self._ticks_left)}")
 
-        while (self._initial_ticks_left + 70) > abs(self._ticks_left):
-            rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
-            rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
 
             rate_message.sleep()
             rate_cmd.sleep()
+            
+        rospy.loginfo(f"stop before 90 anti clock left {self._ticks_left - self._initial_ticks_left}")
+        rospy.loginfo(f"stop before 90 anti clock right {self._ticks_right - self._initial_ticks_right}")
+            
+        
+        
 
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
+
 
 if __name__ == '__main__':
     # create the node
