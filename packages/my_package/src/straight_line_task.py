@@ -8,10 +8,10 @@ from duckietown_msgs.msg import WheelsCmdStamped
 
 
 # throttle and direction for each wheel
-THROTTLE_LEFT = 0.5        # 50% throttle
-DIRECTION_LEFT = 1         # forward
-THROTTLE_RIGHT = 0.5       # 50% throttle
-DIRECTION_RIGHT = 1       # forward
+THROTTLE_LEFT = 0.563        # 50% throttle
+DIRECTION_LEFT = 1           # forward
+THROTTLE_RIGHT = 0.5        # 50% throttle
+DIRECTION_RIGHT = 1         # forward
 
 
 class WheelEncoderReaderNode(DTROS):
@@ -39,15 +39,15 @@ class WheelEncoderReaderNode(DTROS):
         # construct subscriber and publishers
         self.sub_left = rospy.Subscriber(self._left_encoder_topic, WheelEncoderStamped, self.callback_left)
         self.sub_right = rospy.Subscriber(self._right_encoder_topic, WheelEncoderStamped, self.callback_right)
-        self.publisher = rospy.Publisher(self._wheels_topic, WheelCmdStamped, queue_size=1)
+        self.publisher = rospy.Publisher(self._wheels_topic, WheelsCmdStamped, queue_size=1)
 
     def callback_left(self, data):
         # log general information once at the beginning
         rospy.loginfo_once(f"Left encoder resolution: {data.resolution}")
         rospy.loginfo_once(f"Left encoder type: {data.type}")
         # store data value
-        if self._initial_ticks_left == None:
-          self._initial_ticks_left = data.data
+        if self._initial_ticks_left is None:
+            self._initial_ticks_left = data.data
         self._ticks_left = data.data
 
     def callback_right(self, data):
@@ -55,28 +55,51 @@ class WheelEncoderReaderNode(DTROS):
         rospy.loginfo_once(f"Right encoder resolution: {data.resolution}")
         rospy.loginfo_once(f"Right encoder type: {data.type}")
         # store data value
-        if self._initial_ticks_right == None:
-          self._initial_ticks_right = data.data
+        if self._initial_ticks_right is None:
+            self._initial_ticks_right = data.data
         self._ticks_right = data.data
 
     def run(self):
         # publish received tick messages every 0.05 second (20 Hz)
         rate_message = rospy.Rate(20)
         # publish 10 messages every second (10 Hz)
-        run_cmd = rospy.Rate(0.1)
+        rate_cmd = rospy.Rate(1)
         message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
-        while (self._ticks_left - self._initial_ticks_left) < 805 and (self._ticks_right - self._initial_ticks_right) < 805:
-            if self._ticks_right is not None and self._ticks_left is not None and self._initial_ticks_left is not None and self.__initial_ticks_right is not None:
-                # start printing values when received from both encoders
-                msg = f"Wheel encoder ticks [LEFT, RIGHT]: {self._ticks_left}, {self._ticks_right}"
-                rospy.loginfo(msg)
-                self.publisher.publish(message)
+        
+        # make sure initial values are not None
+        while self._initial_ticks_left is None or self._initial_ticks_right is None:
+            rospy.sleep(0.1)
+        
+        while (self._ticks_left - self._initial_ticks_left) < 750 and (self._ticks_right - self._initial_ticks_right) < 750:
+            rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
+            rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
+            self.publisher.publish(message)
+              
+            rate_message.sleep()
+            rate_cmd.sleep()
+        
+        # make it go reverse
+        DIRECTION_LEFT = -1
+        DIRECTION_RIGHT = -1
+        
+        # form the message to reverse the duckiebot
+        self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
+        self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
+        
+        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
+        self._initial_ticks_left = self._ticks_left
+        self._initial_ticks_right = self._ticks_right
+        
+        while abs(self._ticks_left - self._initial_ticks_left) < 750 and abs(self._ticks_right - self._initial_ticks_right) < 750:
+            rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
+            rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
+            self.publisher.publish(message)
               
             rate_message.sleep()
             rate_cmd.sleep()
           
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
-        self.publisher.publish(stop)
+        self.publisher.publish(stop_cmd)
 
 if __name__ == '__main__':
     # create the node
