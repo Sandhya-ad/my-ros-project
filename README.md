@@ -1,47 +1,26 @@
-# Template: template-ros
-
-This template provides a boilerplate repository
-for developing ROS-based software in Duckietown.
-
-**NOTE:** If you want to develop software that does not use
-ROS, check out [this template](https://github.com/duckietown/template-basic).
+# CMPUT 412: Assignment 2
 
 
-## How to use it
+## Publisher and subscriber:
+- The **Publisher (`my_publisher_node.py`)** sends a message every second to the `/chatter` topic.
+- The **Subscriber (`my_subscriber_node.py`)** listens to this topic and logs the received message.
 
-### 1. Fork this repository
+### How to run:
+- First build the code `dts devel build -H csc22907.local -f`
+- Then run the publisher in one terminal using `dts devel run -H csc22907.local -L my-publisher`
+    - It should say something like `Publishing message: 'Hello from csc22907!`
+- Another terminal run  `dts devel run -H csc22907.local -L my-subscriber`
+    - It should say something like ` I heard 'Hello from ROBOT_NAME!'`
+  This shows that the publisher and subscriber are woking good.
 
-Use the fork button in the top-right corner of the github page to fork this template repository.
+### Camera processed image:
+- Run the command `dts devel run -H csc22907.local -L camera-reader`
+- On the other terminal, run `dts start_gui_tools`
+- Then use `rqt_image_view ` to view the processed image 
 
+## Straight and rotate:
+Purpose: go straight for 1.25m, reverse for 1.25m, rotate 90 degrees then 90 degrees back to original place
 
-### 2. Create a new repository
-
-Create a new repository on github.com while
-specifying the newly forked template repository as
-a template for your new repository.
-
-
-### 3. Define dependencies
-
-List the dependencies in the files `dependencies-apt.txt` and
-`dependencies-py3.txt` (apt packages and pip packages respectively).
-
-
-### 4. Place your code
-
-Place your code in the directory `/packages/` of
-your new repository.
-
-
-### 5. Setup launchers
-
-The directory `/launchers` can contain as many launchers (launching scripts)
-as you want. A default launcher called `default.sh` must always be present.
-
-If you create an executable script (i.e., a file with a valid shebang statement)
-a launcher will be created for it. For example, the script file 
-`/launchers/my-launcher.sh` will be available inside the Docker image as the binary
-`dt-launcher-my-launcher`.
-
-When launching a new container, you can simply provide `dt-launcher-my-launcher` as
-command.
+### How to run:
+-  Run the command: dts devel run -H csc22907.local -L move
+ The robot will go straight for 1.25m, reverse for 1.25m, and rotate counterclock wise and clockwise and then come to stop
