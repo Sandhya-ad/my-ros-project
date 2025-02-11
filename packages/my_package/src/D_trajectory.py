@@ -130,7 +130,7 @@ class DTrajectory(DTROS):
 
         # update the parameters
         THROTTLE_RIGHT = 0
-        THROTTLE_LEFT = 0.545  # 50% throttle
+        THROTTLE_LEFT = 0.5  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         DIRECTION_RIGHT = 1  # Forward
 
@@ -158,6 +158,15 @@ class DTrajectory(DTROS):
         ###
         # move straight for 0.92m
         ###
+
+        THROTTLE_LEFT = 0.545  # 50% throttle
+        DIRECTION_LEFT = 1  # Forward
+        THROTTLE_RIGHT = 0.5  # 50% throttle
+        DIRECTION_RIGHT = 1  # Forward
+
+        # update the wheel speed parameters
+        self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
+        self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
 
         # prepare message to send to wheel subscriber
         message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)  # Initialize message here
@@ -212,7 +221,7 @@ class DTrajectory(DTROS):
         # make the robot to stop by setting both wheel speed to 0
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
-        
+
 
 if __name__ == '__main__':
     # create the node
@@ -220,5 +229,3 @@ if __name__ == '__main__':
 
     # run the timer in node
     trajectory_node.run()
-    # keep the process from terminating
-    rospy.spin()
