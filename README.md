@@ -22,5 +22,5 @@
 Purpose: go straight for 1.25m, reverse for 1.25m, rotate 90 degrees then 90 degrees back to original place
 
 ### How to run:
--  Run the command: dts devel run -H csc22907.local -L move
+-  Run the command: `dts devel run -H csc22907.local -L move`
 -  The robot will go straight for 1.25m, reverse for 1.25m, and rotate counterclock wise and clockwise and then come to stop
