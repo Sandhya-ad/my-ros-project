@@ -61,7 +61,7 @@ class WheelEncoderReaderNode(DTROS):
         while self._initial_ticks_left is None or self._initial_ticks_right is None:
             rospy.sleep(0.1)
 
-        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right) # Initialize message here
+        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)  # Initialize message here
 
         # While loop for moving forward
         while (self._ticks_left - self._initial_ticks_left) < 750 and (self._ticks_right - self._initial_ticks_right) < 750:
@@ -94,11 +94,10 @@ class WheelEncoderReaderNode(DTROS):
 
             rate_message.sleep()
             rate_cmd.sleep()
-            
+
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
-        
-        
+
         # rotate 90 degrees clockwise
         THROTTLE_RIGHT = 0
         THROTTLE_LEFT = 0.545  # 50% throttle
@@ -112,7 +111,7 @@ class WheelEncoderReaderNode(DTROS):
         message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
 
         self._initial_ticks_left = self._ticks_left
-        
+
         while (self._initial_ticks_left + 35) > self._ticks_left:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
@@ -120,8 +119,7 @@ class WheelEncoderReaderNode(DTROS):
 
             rate_message.sleep()
             rate_cmd.sleep()
-            
-            
+
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
 
@@ -135,29 +133,26 @@ class WheelEncoderReaderNode(DTROS):
         message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
 
         self._initial_ticks_left = abs(self._ticks_left)
-        
-        while 35 >  abs(self._initial_ticks_left - abs(self._ticks_left)):
+
+        while 35 > abs(self._initial_ticks_left - abs(self._ticks_left)):
             rospy.loginfo(f"Tick difference [LEFT]: {abs(self._ticks_left)}")
 
             self.publisher.publish(message)
 
             rate_message.sleep()
             rate_cmd.sleep()
-            
-        rospy.loginfo(f"stop before 90 anti clock left {self._ticks_left - self._initial_ticks_left}")
-        rospy.loginfo(f"stop before 90 anti clock right {self._ticks_right - self._initial_ticks_right}")
-            
-        
-        
 
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
 
+        # Shut down the node gracefully
+        rospy.loginfo("Shutting down the node, Task completed!")
+        rospy.signal_shutdown("Task completed!!")
+
+        
 
 if __name__ == '__main__':
     # create the node
     node = WheelEncoderReaderNode(node_name='wheel_encoder_reader_node')
     # run the timer in node
     node.run()
-    # keep spinning
-    rospy.spin()
