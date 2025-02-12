@@ -11,7 +11,7 @@ from led_service import LEDBlinker
 
 
 # Throttle and direction for each wheel
-THROTTLE_LEFT = 0.33  # 50% throttle
+THROTTLE_LEFT = 0.315  # 50% throttle
 DIRECTION_LEFT = 1  # Forward
 THROTTLE_RIGHT = 0.3  # 50% throttle
 DIRECTION_RIGHT = 1  # Forward
@@ -62,7 +62,7 @@ class DTrajectory(DTROS):
         self._ticks_right = data.data
 
     def run(self):
-        self.rate_message = rospy.Rate(20)  # 20 Hz
+        self.rate_message = rospy.Rate(40)  # 20 Hz
         # self.rate_cmd = rospy.Rate(20)  # 1 Hz
 
         # Make sure initial values are not None
@@ -84,7 +84,9 @@ class DTrajectory(DTROS):
     def state_1(self):
         """ Stop the robot and turn LED to a specific color (e.g., RED). """
         rospy.loginfo("State 1: Keeping robot stationary for 5 seconds.")
+        self.led_controller.set_led_color("white")
 
+        rospy.sleep(1)
         # Set LED to red
         self.led_controller.set_led_color("red")
 
@@ -146,7 +148,7 @@ class DTrajectory(DTROS):
 
         self._initial_ticks_left = self._ticks_left
 
-        while (self._initial_ticks_left + 99) > self._ticks_left:
+        while (self._initial_ticks_left + 87) > self._ticks_left:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -164,7 +166,7 @@ class DTrajectory(DTROS):
         # move straight for 0.92m
         ###
 
-        THROTTLE_LEFT = 0.33  # 50% throttle
+        THROTTLE_LEFT = 0.3  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         THROTTLE_RIGHT = 0.30  # 50% throttle
         DIRECTION_RIGHT = 1  # Forward
@@ -181,7 +183,7 @@ class DTrajectory(DTROS):
         self._initial_ticks_right = self._ticks_right
 
         # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 500 and (self._ticks_right - self._initial_ticks_right) < 500:
+        while (self._ticks_left - self._initial_ticks_left) < 570 and (self._ticks_right - self._initial_ticks_right) < 570:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -201,7 +203,7 @@ class DTrajectory(DTROS):
 
         # update the parameters
         THROTTLE_RIGHT = 0.2
-        THROTTLE_LEFT = 0.47  # 50% throttle
+        THROTTLE_LEFT = 0.49  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         DIRECTION_RIGHT = 1  # Forward
 
@@ -217,7 +219,7 @@ class DTrajectory(DTROS):
         self._initial_ticks_right = self._ticks_right
 
         # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 240 or (self._ticks_right - self._initial_ticks_right) < 120:
+        while (self._ticks_left - self._initial_ticks_left) < 280 or (self._ticks_right - self._initial_ticks_right) < 135:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -236,7 +238,7 @@ class DTrajectory(DTROS):
         # # move straight for 0.61m
         # ###
 
-        THROTTLE_LEFT = 0.33  # 50% throttle
+        THROTTLE_LEFT = 0.3  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         THROTTLE_RIGHT = 0.3  # 50% throttle
         DIRECTION_RIGHT = 1  # Forward
@@ -290,7 +292,7 @@ class DTrajectory(DTROS):
         self._initial_ticks_right = self._ticks_right
 
         # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 240 or (self._ticks_right - self._initial_ticks_right) < 120:
+        while (self._ticks_left - self._initial_ticks_left) < 300 or (self._ticks_right - self._initial_ticks_right) < 120:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -310,7 +312,7 @@ class DTrajectory(DTROS):
         # move straight for 0.92m
         ###
 
-        THROTTLE_LEFT = 0.33  # 50% throttle
+        THROTTLE_LEFT = 0.3  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         THROTTLE_RIGHT = 0.3  # 50% throttle
         DIRECTION_RIGHT = 1  # Forward

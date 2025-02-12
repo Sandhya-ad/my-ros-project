@@ -19,6 +19,7 @@ class LEDBlinker:
           "blue": ColorRGBA(0.0, 0.0, 1.0, 1.0),
           "yellow": ColorRGBA(1.0, 1.0, 0.0, 1.0),
           "purple": ColorRGBA(1.0, 0.0, 1.0, 1.0),
+            "white": ColorRGBA(1.0, 1.0, 1.0, 1.0),    
       }
 
 

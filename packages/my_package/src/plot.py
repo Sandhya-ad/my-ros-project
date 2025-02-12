@@ -52,13 +52,13 @@ x, y, theta = 0.0, 0.0, 0.0
 timestamps, x_vals, y_vals = [], [], []
 
 # Load ROS bag file
-bag_path = "move.bag"
+bag_path = "move_D.bag"
 bag = rosbag.Bag(bag_path)
 
 prev_time = None
 data_read = False  # Flag to check if data is actually read
 
-for topic, msg, t in bag.read_messages(topics=["/csc22926/wheels_driver_node/wheels_cmd"]):
+for topic, msg, t in bag.read_messages(topics=["/csc22907/wheels_driver_node/wheels_cmd"]):
     vel_left = msg.vel_left
     vel_right = msg.vel_right
 
