@@ -6,11 +6,12 @@ from duckietown.dtros import DTROS, NodeType
 from duckietown_msgs.msg import WheelEncoderStamped
 from duckietown_msgs.msg import WheelsCmdStamped
 from std_msgs.msg import ColorRGBA
+from led_service import LEDBlinker
 #from duckietown_msgs.srv import SetBool, SetBoolResponse
 
 
 # Throttle and direction for each wheel
-THROTTLE_LEFT = 0.545  # 50% throttle
+THROTTLE_LEFT = 0.53  # 50% throttle
 DIRECTION_LEFT = 1  # Forward
 THROTTLE_RIGHT = 0.5  # 50% throttle
 DIRECTION_RIGHT = 1  # Forward
@@ -37,6 +38,9 @@ class DTrajectory(DTROS):
         self._ticks_right = None
         self._initial_ticks_left = None
         self._initial_ticks_right = None
+
+        #initialize the LED_controller
+        self.led_controller = LEDBlinker()
 
         # Construct subscribers and publishers related to wheels
         self.sub_left = rospy.Subscriber(self._left_encoder_topic, WheelEncoderStamped, self.callback_left)
@@ -71,35 +75,32 @@ class DTrajectory(DTROS):
         self.wheel_base = 10  # cm
 
         # while not rospy.is_shutdown():
-        # self.state_1()
+        self.state_1()
         self.state_2()
 
             # put shutdown here
             # --># rotate 90 degrees clockwise
 
     def state_1(self):
-        # keep the robot stationary for 5 seconds.
-        rospy.loginfo("Keeping robot stationary for 5 seconds.")
+        """ Stop the robot and turn LED to a specific color (e.g., RED). """
+        rospy.loginfo("State 1: Keeping robot stationary for 5 seconds.")
 
+        # Set LED to red
+        self.led_controller.set_led_color("red")
+
+        # Stop wheels
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
 
-        # set the LED lights to green color for state 1
-        # TODO
-
-        # Sleep for 5 seconds to keep the robot stationary
         rospy.sleep(5)
-
-        # keep the robot stationary for 5 seconds.
         rospy.loginfo("State 1 finished.")
 
     def state_2(self):
         # Tracing “D” path.
         rospy.loginfo("Tracing “D” path.")
 
-        # set the LED lights to blue color for state 2
-        # TODO
-
+        #Set LED to blue
+        self.led_controller.set_led_color("blue")
         ###
         # move straight for 1.2m
         ###
@@ -112,7 +113,7 @@ class DTrajectory(DTROS):
         self._initial_ticks_right = self._ticks_right
 
         # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 750 and (self._ticks_right - self._initial_ticks_right) < 750:
+        while (self._ticks_left - self._initial_ticks_left) < 720 and (self._ticks_right - self._initial_ticks_right) < 720:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -130,7 +131,7 @@ class DTrajectory(DTROS):
 
         # update the parameters
         THROTTLE_RIGHT = 0
-        THROTTLE_LEFT = 0.5  # 50% throttle
+        THROTTLE_LEFT = 0.527  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         DIRECTION_RIGHT = 1  # Forward
 
@@ -159,7 +160,7 @@ class DTrajectory(DTROS):
         # move straight for 0.92m
         ###
 
-        THROTTLE_LEFT = 0.545  # 50% throttle
+        THROTTLE_LEFT = 0.527  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         THROTTLE_RIGHT = 0.5  # 50% throttle
         DIRECTION_RIGHT = 1  # Forward
@@ -176,7 +177,7 @@ class DTrajectory(DTROS):
         self._initial_ticks_right = self._ticks_right
 
         # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 550 and (self._ticks_right - self._initial_ticks_right) < 550:
+        while (self._ticks_left - self._initial_ticks_left) < 515 and (self._ticks_right - self._initial_ticks_right) < 515:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -188,13 +189,13 @@ class DTrajectory(DTROS):
         stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         self.publisher.publish(stop_cmd)
 
-        # # ###
-        # # # curve right 
-        # # ###
+        # # # ###
+        # # # # curve right 
+        # # # ###
 
         # update the parameters
-        THROTTLE_RIGHT = 0.25
-        THROTTLE_LEFT = 0.545  # 50% throttle
+        THROTTLE_RIGHT = 0.2
+        THROTTLE_LEFT = 0.527  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
         DIRECTION_RIGHT = 1  # Forward
 
@@ -210,7 +211,7 @@ class DTrajectory(DTROS):
         self._initial_ticks_right = self._ticks_right
 
         # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 208 or (self._ticks_right - self._initial_ticks_right) < 104:
+        while (self._ticks_left - self._initial_ticks_left) < 240 or (self._ticks_right - self._initial_ticks_right) < 120:
             rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
             rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
             self.publisher.publish(message)
@@ -223,9 +224,9 @@ class DTrajectory(DTROS):
         self.publisher.publish(stop_cmd)
 
 
-        ###
-        # move straight for 0.61m
-        ###
+        # ###
+        # # move straight for 0.61m
+        # ###
 
         THROTTLE_LEFT = 0.545  # 50% throttle
         DIRECTION_LEFT = 1  # Forward
@@ -257,107 +258,107 @@ class DTrajectory(DTROS):
         self.publisher.publish(stop_cmd)
 
 
-        # # ###
-        # # # curve right 
-        # # ###
+        # # # ###
+        # # # # curve right 
+        # # # ###
 
-        # update the parameters
-        THROTTLE_RIGHT = 0.25
-        THROTTLE_LEFT = 0.545  # 50% throttle
-        DIRECTION_LEFT = 1  # Forward
-        DIRECTION_RIGHT = 1  # Forward
+        # # update the parameters
+        # THROTTLE_RIGHT = 0.25
+        # THROTTLE_LEFT = 0.545  # 50% throttle
+        # DIRECTION_LEFT = 1  # Forward
+        # DIRECTION_RIGHT = 1  # Forward
 
-        # update the wheel speed parameters
-        self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
-        self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
+        # # update the wheel speed parameters
+        # self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
+        # self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
 
-        # prepare message to send to wheel subscriber
-        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)  # Initialize message here
+        # # prepare message to send to wheel subscriber
+        # message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)  # Initialize message here
 
-        # update initial values for left and right
-        self._initial_ticks_left = self._ticks_left
-        self._initial_ticks_right = self._ticks_right
+        # # update initial values for left and right
+        # self._initial_ticks_left = self._ticks_left
+        # self._initial_ticks_right = self._ticks_right
 
-        # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 208 or (self._ticks_right - self._initial_ticks_right) < 104:
-            rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
-            rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
-            self.publisher.publish(message)
+        # # While loop for moving forward
+        # while (self._ticks_left - self._initial_ticks_left) < 208 or (self._ticks_right - self._initial_ticks_right) < 104:
+        #     rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
+        #     rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
+        #     self.publisher.publish(message)
 
-            self.rate_message.sleep()
-            # self.rate_cmd.sleep()
+        #     self.rate_message.sleep()
+        #     # self.rate_cmd.sleep()
 
-        # make the robot to stop by setting both wheel speed to 0
-        stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
-        self.publisher.publish(stop_cmd)
-
-
-
-        ###
-        # move straight for 0.92m
-        ###
-
-        THROTTLE_LEFT = 0.545  # 50% throttle
-        DIRECTION_LEFT = 1  # Forward
-        THROTTLE_RIGHT = 0.5  # 50% throttle
-        DIRECTION_RIGHT = 1  # Forward
-
-        # update the wheel speed parameters
-        self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
-        self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
-
-        # prepare message to send to wheel subscriber
-        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)  # Initialize message here
-
-        # update initial values for left and right
-        self._initial_ticks_left = self._ticks_left
-        self._initial_ticks_right = self._ticks_right
-
-        # While loop for moving forward
-        while (self._ticks_left - self._initial_ticks_left) < 550 and (self._ticks_right - self._initial_ticks_right) < 550:
-            rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
-            rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
-            self.publisher.publish(message)
-
-            self.rate_message.sleep()
-            # self.rate_cmd.sleep()
-
-        # make the robot to stop by setting both wheel speed to 0
-        stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
-        self.publisher.publish(stop_cmd)
+        # # make the robot to stop by setting both wheel speed to 0
+        # stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
+        # self.publisher.publish(stop_cmd)
 
 
 
-        ###
-        # rotate 90 degrees clockwise
-        ###
+        # ###
+        # # move straight for 0.92m
+        # ###
 
-        # update the parameters
-        THROTTLE_RIGHT = 0
-        THROTTLE_LEFT = 0.5  # 50% throttle
-        DIRECTION_LEFT = 1  # Forward
-        DIRECTION_RIGHT = 1  # Forward
+        # THROTTLE_LEFT = 0.545  # 50% throttle
+        # DIRECTION_LEFT = 1  # Forward
+        # THROTTLE_RIGHT = 0.5  # 50% throttle
+        # DIRECTION_RIGHT = 1  # Forward
 
-        # update the wheel speed parameters
-        self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
-        self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
+        # # update the wheel speed parameters
+        # self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
+        # self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
 
-        # update the message
-        message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
+        # # prepare message to send to wheel subscriber
+        # message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)  # Initialize message here
 
-        self._initial_ticks_left = self._ticks_left
+        # # update initial values for left and right
+        # self._initial_ticks_left = self._ticks_left
+        # self._initial_ticks_right = self._ticks_right
 
-        while (self._initial_ticks_left + 107) > self._ticks_left:
-            rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
-            rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
-            self.publisher.publish(message)
+        # # While loop for moving forward
+        # while (self._ticks_left - self._initial_ticks_left) < 550 and (self._ticks_right - self._initial_ticks_right) < 550:
+        #     rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
+        #     rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
+        #     self.publisher.publish(message)
 
-            self.rate_message.sleep()
-            # self.rate_cmd.sleep()
+        #     self.rate_message.sleep()
+        #     # self.rate_cmd.sleep()
 
-        # make the robot to stop by setting both wheel speed to 0
-        stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
-        self.publisher.publish(stop_cmd)
+        # # make the robot to stop by setting both wheel speed to 0
+        # stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
+        # self.publisher.publish(stop_cmd)
+
+
+
+        # ###
+        # # rotate 90 degrees clockwise
+        # ###
+
+        # # update the parameters
+        # THROTTLE_RIGHT = 0
+        # THROTTLE_LEFT = 0.5  # 50% throttle
+        # DIRECTION_LEFT = 1  # Forward
+        # DIRECTION_RIGHT = 1  # Forward
+
+        # # update the wheel speed parameters
+        # self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
+        # self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
+
+        # # update the message
+        # message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
+
+        # self._initial_ticks_left = self._ticks_left
+
+        # while (self._initial_ticks_left + 107) > self._ticks_left:
+        #     rospy.loginfo(f"Tick difference [LEFT]: {self._ticks_left - self._initial_ticks_left}")
+        #     rospy.loginfo(f"Tick difference [RIGHT]: {self._ticks_right - self._initial_ticks_right}")
+        #     self.publisher.publish(message)
+
+        #     self.rate_message.sleep()
+        #     # self.rate_cmd.sleep()
+
+        # # make the robot to stop by setting both wheel speed to 0
+        # stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
+        # self.publisher.publish(stop_cmd)
 
         
 
