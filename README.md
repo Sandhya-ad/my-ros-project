@@ -21,7 +21,23 @@
 
 ## Straight and rotate:
 Purpose: go straight for 1.25m, reverse for 1.25m, rotate 90 degrees then 90 degrees back to original place
+The bag file for this run is moveS.D
 
 ### How to run:
 -  Run the command: `dts devel run -H csc22907.local -L straight-line-task`
 -  The robot will go straight for 1.25m, reverse for 1.25m, and rotate counterclock wise and clockwise and then come to stop
+
+## D-tracing
+Purpose: around in D-shape
+
+### How to run:
+-  Run the command: `dts devel run -H csc22907.local -L D-trajectory`
+-  The robot will trace d shape expecifically :
+    - Start from the left of the D
+    - Move straight for 1.2m
+    - turn sharp 90 degree
+    - move straight for 0.92m 
+    - curve right
+    - move straight for 0.92m
+    - turn 90 to the right
+    The bag file of this run in moveD.bag

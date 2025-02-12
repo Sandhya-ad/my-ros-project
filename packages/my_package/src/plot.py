@@ -1,73 +1,33 @@
-# #!/usr/bin/env python3
-
-# import rosbag
-# import numpy as np
-# import matplotlib.pyplot as plt
-# from nav_msgs.msg import Odometry
-
-# # Initialize lists for plotting
-# x_vals, y_vals = [], []
-# bag_file = "move.bag"  # Change this to your actual bag file path
-# topic_name = "/csc22907/deadreckoning_node/odom"  # C
-
-# def compute_trajectory():
-#     bag = rosbag.Bag('move.bag')
-
-#     print("Reading position data from bag file...")
-
-#     for topic, msg, t in bag.read_messages(topics=['/csc22907/deadreckoning_node/odom']):
-#         x = msg.pose.pose.position.x  # Read x directly from position
-#         y = msg.pose.pose.position.y  # Read y directly from position
-
-#         x_vals.append(x)
-#         y_vals.append(y)
-
-#         print(f"Time: {t.to_sec():.2f}, X: {x:.3f}, Y: {y:.3f}")
-
-#     bag.close()
-
-# def plot_trajectory():
-#     compute_trajectory()
-
-#     plt.figure(figsize=(8, 6))
-#     plt.plot(x_vals, y_vals, marker='o', linestyle='-', markersize=3, label="Duckiebot Trajectory")
-#     plt.xlabel("X Position (m)")
-#     plt.ylabel("Y Position (m)")
-#     plt.title("Duckiebot Trajectory from Odometry")
-#     plt.legend()
-#     plt.grid()
-#     plt.show()
-
-# if __name__ == '__main__':
-#     plot_trajectory()
 import rosbag
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 # Constants
 WHEEL_BASE = 0.2  # Adjust this based on your robot's real dimensions
+radius = 3.1  # Wheel radius
 
 # Initialize position and heading
-x, y, theta = 0.0, 0.0, 0.0
+x, y, theta = 0.0, 0.0, math.pi/2
 timestamps, x_vals, y_vals = [], [], []
 
 # Load ROS bag file
-bag_path = "move_D.bag"
+bag_path = "moveS.bag"
 bag = rosbag.Bag(bag_path)
 
 prev_time = None
 data_read = False  # Flag to check if data is actually read
 
 for topic, msg, t in bag.read_messages(topics=["/csc22907/wheels_driver_node/wheels_cmd"]):
-    vel_left = msg.vel_left
-    vel_right = msg.vel_right
+    vel_left = msg.vel_left * radius
+    vel_right = msg.vel_right * radius
 
     # Debugging output
     print(f"Time: {t.to_sec()}, Left: {vel_left}, Right: {vel_right}")
 
     # Compute velocities
-    v = (vel_left + vel_right) / 2  
-    omega = (vel_right - vel_left) / WHEEL_BASE
+    v = (vel_left + vel_right) / 2  # Linear velocity
+    omega = (vel_right - vel_left) / WHEEL_BASE  # Angular velocity
 
     # Convert time from ROS format
     current_time = t.to_sec()
@@ -81,12 +41,10 @@ for topic, msg, t in bag.read_messages(topics=["/csc22907/wheels_driver_node/whe
     prev_time = current_time
     data_read = True  # Mark that data is actually processed
 
-    # Flip theta if needed (negate omega)
-    theta += omega * dt  # If movement is flipped, change to theta -= omega * dt
-
-    # Update position (swap X and Y if necessary)
-    y += v * np.cos(theta) * dt
-    x += v * np.sin(theta) * dt
+    # Correct position update using odometry model
+    x += v * math.cos(theta) * dt
+    y += v * math.sin(theta) * dt
+    theta += omega * dt  # Update orientation
 
     # Store values for plotting
     timestamps.append(current_time)
@@ -110,8 +68,5 @@ plt.xlabel("X Position (m)")
 plt.ylabel("Y Position (m)")
 plt.title("Robot Trajectory from Wheel Velocities")
 plt.axis("equal")  # Keep equal scaling
-
-# Flip Y-axis if needed
-
 plt.grid()
 plt.show()
