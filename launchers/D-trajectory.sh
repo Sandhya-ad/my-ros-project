@@ -5,8 +5,8 @@ source /environment.sh
 # initialize launch file
 dt-launchfile-init
 
-# launch subscriber
-rosrun my_package move.py
+# launch publisher
+rosrun my_package D-trajectory.py
 
 # wait for app to end
 dt-launchfile-join
