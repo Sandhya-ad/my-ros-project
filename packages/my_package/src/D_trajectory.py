@@ -360,6 +360,15 @@ class DTrajectory(DTROS):
         # stop_cmd = WheelsCmdStamped(vel_left=0, vel_right=0)
         # self.publisher.publish(stop_cmd)
 
+        #After the final rotation is complete
+
+        self.led_controller.set_led_color("red")
+        rospy.sleep(5)
+        self.publisher.publish(stop_cmd)
+
+  
+
+
         
 
 
