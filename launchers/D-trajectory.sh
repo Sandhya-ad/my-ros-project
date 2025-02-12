@@ -6,7 +6,7 @@ source /environment.sh
 dt-launchfile-init
 
 # launch publisher
-rosrun my_package D-trajectory.py
+rosrun my_package D_trajectory.py
 
 # wait for app to end
 dt-launchfile-join
